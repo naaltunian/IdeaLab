@@ -8,12 +8,14 @@ app.engine('handlebars', exphbs({ defaultLayout: 'main'} ));
 app.set('view engine', 'handlebars');
 
 
+// home route
 app.get('/', (req, res) => {
-    res.send("Index");
+    res.render("index");
 });
 
+// about route
 app.get('/about', (req, res) => {
-    res.send("About");
+    res.render("about");
 })
 
 const PORT = 5000
