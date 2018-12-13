@@ -1,8 +1,14 @@
 const express = require("express");
 const exphbs = require("express-handlebars");
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 
 const app = express();
+
+
+// body parser
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
 
 // handlebars
 app.engine('handlebars', exphbs({ defaultLayout: 'main'} ));
@@ -31,6 +37,11 @@ app.get('/about', (req, res) => {
 app.get('/ideas/add', (req, res) => {
     res.render('ideas/add');
 });
+
+app.post('/ideas', (req, res) => {
+    console.log(req.body)
+    res.send("submitted")
+})
 
 const PORT = 5000
 
