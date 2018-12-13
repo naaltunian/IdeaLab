@@ -39,9 +39,14 @@ app.get('/ideas/add', (req, res) => {
 });
 
 app.post('/ideas', (req, res) => {
-    console.log(req.body)
-    res.send("submitted")
-})
+    console.log(req.body);
+    res.send("submitted");
+    const newUser = {
+        title: req.body.title,
+        details: req.body.details
+    }
+    new Idea(newUser).save()
+});
 
 const PORT = 5000
 
