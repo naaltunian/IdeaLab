@@ -1,12 +1,22 @@
 const express = require("express");
 const exphbs = require("express-handlebars");
+const mongoose = require('mongoose');
 
 const app = express();
 
-// handlebars middleware
+// handlebars
 app.engine('handlebars', exphbs({ defaultLayout: 'main'} ));
 app.set('view engine', 'handlebars');
 
+mongoose.Promise = global.Promise;
+// mongoose connection
+mongoose.connect('mongodb://localhost/IdeaLab', { useNewUrlParser: true })
+    .then(() => console.log("DB Connected"))
+    .catch(err => console.log(err));
+
+// idea model
+require('./models/Idea');
+const Idea = mongoose.model('ideas');
 
 // home route
 app.get('/', (req, res) => {
