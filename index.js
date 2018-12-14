@@ -46,6 +46,9 @@ app.post('/ideas', (req, res) => {
         details: req.body.details
     }
     new Idea(newUser).save()
+    .then(idea => {
+        res.redirect('/ideas');
+    })
 });
 
 const PORT = 5000
