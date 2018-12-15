@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 
 const app = express();
 
-
 // body parser
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -14,8 +13,8 @@ app.use(bodyParser.json());
 app.engine('handlebars', exphbs({ defaultLayout: 'main'} ));
 app.set('view engine', 'handlebars');
 
-mongoose.Promise = global.Promise;
 // mongoose connection
+mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/IdeaLab', { useNewUrlParser: true })
     .then(() => console.log("DB Connected"))
     .catch(err => console.log(err));
@@ -40,15 +39,30 @@ app.get('/ideas/add', (req, res) => {
 
 app.post('/ideas', (req, res) => {
     console.log(req.body);
-    res.send("submitted");
-    const newUser = {
-        title: req.body.title,
-        details: req.body.details
+    let errors = [];
+    if(!req.body.title){
+        errors.push({text: "Add title"})
     }
-    new Idea(newUser).save()
-    .then(idea => {
-        res.redirect('/ideas');
-    })
+    if(!req.body.details){
+        errors.push({text: "Add details"})
+    }
+
+    if(errors.length > 0){
+        res.render("ideas/add",{
+            errors: errors,
+            title: req.body.title,
+            details: req.body.details
+        });
+    } else {
+        const newUser = {
+            title: req.body.title,
+            details: req.body.details
+        } 
+        new Idea(newUser).save()
+            .then(idea => {
+            res.redirect('/ideas');
+        });
+    }
 });
 
 const PORT = 5000
