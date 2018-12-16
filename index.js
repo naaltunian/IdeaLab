@@ -2,6 +2,9 @@ const express = require("express");
 const exphbs = require("express-handlebars");
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const database = require("./config.js");
+
+const url = `mongodb://${database.dbUser}:${database.dbPassword}@ds135724.mlab.com:35724/idea-lab`
 
 const app = express();
 
@@ -15,7 +18,7 @@ app.set('view engine', 'handlebars');
 
 // mongoose connection
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost/IdeaLab', { useNewUrlParser: true })
+mongoose.connect(url, { useNewUrlParser: true })
     .then(() => console.log("DB Connected"))
     .catch(err => console.log(err));
 
@@ -48,7 +51,7 @@ app.post('/ideas', (req, res) => {
     }
 
     if(errors.length > 0){
-        res.render("ideas/add",{
+        res.render("ideas/add", {
             errors: errors,
             title: req.body.title,
             details: req.body.details
