@@ -2,6 +2,7 @@ const express = require("express");
 const exphbs = require("express-handlebars");
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const methodOverride = require("method-override");
 const database = require("./config.js");
 
 const url = `mongodb://${database.dbUser}:${database.dbPassword}@ds135724.mlab.com:35724/idea-lab`
@@ -15,6 +16,9 @@ app.use(bodyParser.json());
 // handlebars
 app.engine('handlebars', exphbs({ defaultLayout: 'main'} ));
 app.set('view engine', 'handlebars');
+
+// method-override
+app.use(methodOverride('_method'));
 
 // mongoose connection
 mongoose.Promise = global.Promise;
@@ -90,6 +94,21 @@ app.post('/ideas', (req, res) => {
         });
     }
 });
+
+// edit process
+app.put('/ideas/:id', (req, res) => {
+    Idea.findOne({
+        _id: req.params.id
+    })
+    .then(idea => {
+        idea.title = req.body.title;
+        idea.details = req.body.details;
+        idea.save()
+        .then(idea => {
+            res.redirect('/ideas')
+        });
+    });
+})
 
 const PORT = 5000
 
