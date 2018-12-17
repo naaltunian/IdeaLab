@@ -2,6 +2,9 @@ const express = require("express");
 const exphbs = require("express-handlebars");
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const methodOverride = require("method-override");
+const flash = require('connect-flash');
+const session = require('express-session');
 const database = require("./config.js");
 
 const url = `mongodb://${database.dbUser}:${database.dbPassword}@ds135724.mlab.com:35724/idea-lab`
@@ -12,9 +15,28 @@ const app = express();
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+// express-session
+app.use(session({
+    secret: 'secret',
+    resave: true,
+    saveUninitialized: true
+}));
+
+// connect-flash
+app.use(flash());
+app.use((req, res, next) => {
+    res.locals.success = req.flash("success");
+    res.locals.error_msg = req.flash("error_msg");
+    res.locals.error = req.flash("error");
+    next();
+});
+
 // handlebars
 app.engine('handlebars', exphbs({ defaultLayout: 'main'} ));
 app.set('view engine', 'handlebars');
+
+// method-override
+app.use(methodOverride('_method'));
 
 // mongoose connection
 mongoose.Promise = global.Promise;
@@ -34,7 +56,19 @@ app.get('/', (req, res) => {
 // about route
 app.get('/about', (req, res) => {
     res.render("about");
-})
+});
+
+// edit
+app.get('/ideas/edit/:id', (req, res) => {
+    Idea.findOne({
+        _id: req.params.id
+    })
+    .then(idea => {
+        res.render('ideas/edit', {
+            idea: idea
+        });
+    });
+});
 
 // all notes
 app.get('/ideas', (req, res) => {
@@ -74,9 +108,37 @@ app.post('/ideas', (req, res) => {
         } 
         new Idea(newUser).save()
             .then(idea => {
+            req.flash("success", "Note added");
             res.redirect('/ideas');
         });
     }
+});
+
+// edit process
+app.put('/ideas/:id', (req, res) => {
+    Idea.findOne({
+        _id: req.params.id
+    })
+    .then(idea => {
+        idea.title = req.body.title;
+        idea.details = req.body.details;
+        idea.save()
+        .then(idea => {
+            req.flash("success", "Note updated");
+            res.redirect('/ideas');
+        });
+    });
+});
+
+// delete note
+app.delete('/ideas/:id', (req, res) => {
+    Idea.deleteOne({
+        _id: req.params.id
+    })
+    .then(() => {
+        req.flash("success", "Note deleted");
+        res.redirect('/ideas');
+    });
 });
 
 const PORT = 5000
