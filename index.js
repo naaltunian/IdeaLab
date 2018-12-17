@@ -3,6 +3,8 @@ const exphbs = require("express-handlebars");
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const methodOverride = require("method-override");
+const flash = require('connect-flash');
+const session = require('express-session');
 const database = require("./config.js");
 
 const url = `mongodb://${database.dbUser}:${database.dbPassword}@ds135724.mlab.com:35724/idea-lab`
@@ -12,6 +14,22 @@ const app = express();
 // body parser
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+// express-session
+app.use(session({
+    secret: 'secret',
+    resave: true,
+    saveUninitialized: true
+}));
+
+// connect-flash
+app.use(flash());
+app.use((req, res, next) => {
+    res.locals.success = req.flash("success");
+    res.locals.error_msg = req.flash("error_msg");
+    res.locals.error = req.flash("error");
+    next();
+});
 
 // handlebars
 app.engine('handlebars', exphbs({ defaultLayout: 'main'} ));
@@ -90,6 +108,7 @@ app.post('/ideas', (req, res) => {
         } 
         new Idea(newUser).save()
             .then(idea => {
+            req.flash("success", "Note added");
             res.redirect('/ideas');
         });
     }
@@ -105,7 +124,8 @@ app.put('/ideas/:id', (req, res) => {
         idea.details = req.body.details;
         idea.save()
         .then(idea => {
-            res.redirect('/ideas')
+            req.flash("success", "Note updated");
+            res.redirect('/ideas');
         });
     });
 });
@@ -116,6 +136,7 @@ app.delete('/ideas/:id', (req, res) => {
         _id: req.params.id
     })
     .then(() => {
+        req.flash("success", "Note deleted");
         res.redirect('/ideas');
     });
 });
