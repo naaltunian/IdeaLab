@@ -36,12 +36,23 @@ app.get('/about', (req, res) => {
     res.render("about");
 })
 
+// all notes
+app.get('/ideas', (req, res) => {
+    Idea.find({})
+        .sort({date: 'desc'})
+        .then(ideas => {
+            res.render("ideas/index", {
+                ideas: ideas
+            });
+        });
+});
+
 app.get('/ideas/add', (req, res) => {
     res.render('ideas/add');
 });
 
+// save note
 app.post('/ideas', (req, res) => {
-    console.log(req.body);
     let errors = [];
     if(!req.body.title){
         errors.push({text: "Add title"})
