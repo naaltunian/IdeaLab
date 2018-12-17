@@ -34,7 +34,19 @@ app.get('/', (req, res) => {
 // about route
 app.get('/about', (req, res) => {
     res.render("about");
-})
+});
+
+// edit
+app.get('/ideas/edit/:id', (req, res) => {
+    Idea.findOne({
+        _id: req.params.id
+    })
+    .then(idea => {
+        res.render('ideas/edit', {
+            idea: idea
+        });
+    });
+});
 
 // all notes
 app.get('/ideas', (req, res) => {
