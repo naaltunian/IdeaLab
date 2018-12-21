@@ -11,6 +11,9 @@ const url = `mongodb://${database.dbUser}:${database.dbPassword}@ds135724.mlab.c
 
 const app = express();
 
+// routes
+const ideas = require('./routes/ideas');
+
 // body parser
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -44,10 +47,6 @@ mongoose.connect(url, { useNewUrlParser: true })
     .then(() => console.log("DB Connected"))
     .catch(err => console.log(err));
 
-// idea model
-require('./models/Idea');
-const Idea = mongoose.model('ideas');
-
 // home route
 app.get('/', (req, res) => {
     res.render("index");
@@ -58,88 +57,18 @@ app.get('/about', (req, res) => {
     res.render("about");
 });
 
-// edit
-app.get('/ideas/edit/:id', (req, res) => {
-    Idea.findOne({
-        _id: req.params.id
-    })
-    .then(idea => {
-        res.render('ideas/edit', {
-            idea: idea
-        });
-    });
+// user registration
+app.get('/users/register', (req, res) => {
+    
 });
 
-// all notes
-app.get('/ideas', (req, res) => {
-    Idea.find({})
-        .sort({date: 'desc'})
-        .then(ideas => {
-            res.render("ideas/index", {
-                ideas: ideas
-            });
-        });
+// user login
+app.get('/users/login', (req, res) => {
+    
 });
 
-app.get('/ideas/add', (req, res) => {
-    res.render('ideas/add');
-});
-
-// save note
-app.post('/ideas', (req, res) => {
-    let errors = [];
-    if(!req.body.title){
-        errors.push({text: "Add title"})
-    }
-    if(!req.body.details){
-        errors.push({text: "Add details"})
-    }
-
-    if(errors.length > 0){
-        res.render("ideas/add", {
-            errors: errors,
-            title: req.body.title,
-            details: req.body.details
-        });
-    } else {
-        const newUser = {
-            title: req.body.title,
-            details: req.body.details
-        } 
-        new Idea(newUser).save()
-            .then(idea => {
-            req.flash("success", "Note added");
-            res.redirect('/ideas');
-        });
-    }
-});
-
-// edit process
-app.put('/ideas/:id', (req, res) => {
-    Idea.findOne({
-        _id: req.params.id
-    })
-    .then(idea => {
-        idea.title = req.body.title;
-        idea.details = req.body.details;
-        idea.save()
-        .then(idea => {
-            req.flash("success", "Note updated");
-            res.redirect('/ideas');
-        });
-    });
-});
-
-// delete note
-app.delete('/ideas/:id', (req, res) => {
-    Idea.deleteOne({
-        _id: req.params.id
-    })
-    .then(() => {
-        req.flash("success", "Note deleted");
-        res.redirect('/ideas');
-    });
-});
+// ideas routes
+app.use('/ideas', ideas);
 
 const PORT = 5000
 
