@@ -38,26 +38,34 @@ router.post('/register', (req, res) => {
             passwordConfirmation: req.body.passwordConfirmation
         });
     } else {
-        const newUser = new User({
-            name: req.body.name,
-            email: req.body.email,
-            password: req.body.password
-        });
-        bcrypt.genSalt(10, (err, salt) => {
-            bcrypt.hash(newUser.password, salt, (err, hash) => {
-                if(err) throw err;
-                newUser.password = hash;
-                newUser.save()
-                .then(user => {
-                    req.flash('success', "Registered!")
-                    res.redirect('/users/login')
-                })
-                .catch(err => {
-                    console.log(err);
-                    return;
-                })
-            })
-        })
+        User.findOne({email: req.body.email})
+            .then(user => {
+                if(user){
+                    req.flash('error_msg', "Email Taken");
+                    res.redirect('/users/login');
+                } else {
+                    const newUser = new User({
+                        name: req.body.name,
+                        email: req.body.email,
+                        password: req.body.password
+                    });
+                    bcrypt.genSalt(10, (err, salt) => {
+                        bcrypt.hash(newUser.password, salt, (err, hash) => {
+                            if(err) throw err;
+                            newUser.password = hash;
+                            newUser.save()
+                            .then(user => {
+                                req.flash('success', "Registered!")
+                                res.redirect('/users/register')
+                            })
+                            .catch(err => {
+                                console.log(err);
+                                return;
+                            })
+                        })
+                    })
+                }
+            });
     }
 })
 
