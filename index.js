@@ -13,6 +13,7 @@ const app = express();
 
 // routes
 const ideas = require('./routes/ideas');
+const users = require('./routes/users');
 
 // body parser
 app.use(bodyParser.urlencoded({extended: false}));
@@ -57,18 +58,11 @@ app.get('/about', (req, res) => {
     res.render("about");
 });
 
-// user registration
-app.get('/users/register', (req, res) => {
-    
-});
-
-// user login
-app.get('/users/login', (req, res) => {
-    
-});
-
 // ideas routes
 app.use('/ideas', ideas);
+
+// users routes
+app.use('/users', users);
 
 const PORT = 5000
 
