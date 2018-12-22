@@ -18,7 +18,16 @@ router.get('/login', (req, res) => {
     res.render('users/login');
 });
 
-// form post
+// login post
+router.post('/login', (req, res, next) => {
+    passport.authenticate('local', {
+        successRedirect: '/ideas',
+        failureRedirect: '/users/login',
+        failureFlash: true
+    })(req, res, next);
+})
+
+// registration post
 router.post('/register', (req, res) => {
     let errors = [];
     if(req.body.password != req.body.passwordConfirmation) {
@@ -42,7 +51,7 @@ router.post('/register', (req, res) => {
             .then(user => {
                 if(user){
                     req.flash('error_msg', "Email Taken");
-                    res.redirect('/users/login');
+                    res.redirect('/users/register');
                 } else {
                     const newUser = new User({
                         name: req.body.name,
@@ -56,7 +65,7 @@ router.post('/register', (req, res) => {
                             newUser.save()
                             .then(user => {
                                 req.flash('success', "Registered!")
-                                res.redirect('/users/register')
+                                res.redirect('/')
                             })
                             .catch(err => {
                                 console.log(err);
