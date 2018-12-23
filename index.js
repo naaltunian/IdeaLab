@@ -6,6 +6,7 @@ const methodOverride = require("method-override");
 const flash = require('connect-flash');
 const session = require('express-session');
 const database = require("./config.js");
+const passport = require('passport')
 
 const url = `mongodb://${database.dbUser}:${database.dbPassword}@ds135724.mlab.com:35724/idea-lab`
 
@@ -19,6 +20,9 @@ const users = require('./routes/users');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+// passport
+require('./config/passport')(passport);
+
 // express-session
 app.use(session({
     secret: 'secret',
@@ -26,12 +30,17 @@ app.use(session({
     saveUninitialized: true
 }));
 
+// passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
 // connect-flash
 app.use(flash());
 app.use((req, res, next) => {
     res.locals.success = req.flash("success");
     res.locals.error_msg = req.flash("error_msg");
     res.locals.error = req.flash("error");
+    res.locals.user = req.user || null;
     next();
 });
 
