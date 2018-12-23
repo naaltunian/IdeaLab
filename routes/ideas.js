@@ -2,12 +2,15 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
+// authentication helper
+const { isAuthenticated } = require('../helpers/authentication')
+
 // idea model
 require('../models/Idea');
 const Idea = mongoose.model('ideas');
 
 // edit
-router.get('/edit/:id', (req, res) => {
+router.get('/edit/:id', isAuthenticated, (req, res) => {
     Idea.findOne({
         _id: req.params.id
     })
@@ -19,7 +22,7 @@ router.get('/edit/:id', (req, res) => {
 });
 
 // all notes
-router.get('/', (req, res) => {
+router.get('/', isAuthenticated, (req, res) => {
     Idea.find({})
         .sort({date: 'desc'})
         .then(ideas => {
@@ -29,12 +32,12 @@ router.get('/', (req, res) => {
         });
 });
 
-router.get('/add', (req, res) => {
+router.get('/add', isAuthenticated, (req, res) => {
     res.render('ideas/add');
 });
 
 // save note
-router.post('/', (req, res) => {
+router.post('/', isAuthenticated, (req, res) => {
     let errors = [];
     if(!req.body.title){
         errors.push({text: "Add title"})
@@ -63,7 +66,7 @@ router.post('/', (req, res) => {
 });
 
 // edit process
-router.put('/:id', (req, res) => {
+router.put('/:id', isAuthenticated, (req, res) => {
     Idea.findOne({
         _id: req.params.id
     })
@@ -79,7 +82,7 @@ router.put('/:id', (req, res) => {
 });
 
 // delete note
-router.delete('/:id', (req, res) => {
+router.delete('/:id', isAuthenticated, (req, res) => {
     Idea.deleteOne({
         _id: req.params.id
     })
